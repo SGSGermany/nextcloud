@@ -1,0 +1,64 @@
+name: Build & publish container
+
+on:
+  push:
+    branches: [ main ]
+
+concurrency: build
+
+env:
+  GIT_REMOTE_URL: ${{ github.server_url }}/${{ github.repository }}.git
+  CI_TOOLS_SETUP: https://raw.githubusercontent.com/SGSGermany/ci-tools/main/setup.sh
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    env:
+      REGISTRY: ghcr.io
+      OWNER: sgsgermany
+      IMAGE: nextcloud
+
+    steps:
+      - name: Setup CI tools
+        run: |
+          . <(curl -fsS -L "$CI_TOOLS_SETUP" | bash -s ~/ci-tools)
+          echo "CI_TOOLS_PATH=$CI_TOOLS_PATH" | tee -a "$GITHUB_ENV"
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Log into container registry ${{ env.REGISTRY }}
+        uses: redhat-actions/podman-login@v1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build container image
+        run: |
+          buildah unshare ./build.sh
+
+      - name: Generate container image tags
+        run: |
+          source <(./tags.sh)
+          echo "VERSION=$VERSION" | tee -a "$GITHUB_ENV"
+          echo "TAGS=${TAGS:-latest}" | tee -a "$GITHUB_ENV"
+
+      - name: Add container image tags
+        run: |
+          "$CI_TOOLS_PATH/containers/add-image-tags.sh" "latest"
+
+      - name: Container image metadata
+        run: |
+          podman image inspect "$IMAGE:latest"
+
+      - name: Push container image
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ env.IMAGE }}
+          registry: ${{ env.REGISTRY }}/${{ env.OWNER }}
+          tags: ${{ env.TAGS }}
