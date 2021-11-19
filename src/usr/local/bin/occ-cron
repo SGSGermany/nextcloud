@@ -1,0 +1,6 @@
+#!/bin/sh
+if [ "$(id -un)" != "www-data" ]; then
+    exec su -p -s /bin/sh www-data -c 'php -f /var/www/html/cron.php' -- '/bin/sh'
+else
+    exec php -f /var/www/html/cron.php
+fi
