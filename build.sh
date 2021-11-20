@@ -89,6 +89,21 @@ cmd buildah config \
     --volume "/run/mysql" \
     "$CONTAINER"
 
+echo + "NEXTCLOUD_VERSION=\"\$(buildah run $CONTAINER -- /bin/sh -c 'echo \"\$NEXTCLOUD_VERSION\"')\""
+NEXTCLOUD_VERSION="$(buildah run "$CONTAINER" -- /bin/sh -c 'echo "$NEXTCLOUD_VERSION"')"
+
+cmd buildah config \
+    --annotation org.opencontainers.image.title="Nextcloud" \
+    --annotation org.opencontainers.image.description="A php-fpm container of Nextcloud." \
+    --annotation org.opencontainers.image.version="$NEXTCLOUD_VERSION" \
+    --annotation org.opencontainers.image.url="https://github.com/SGSGermany/nextcloud" \
+    --annotation org.opencontainers.image.authors="SGS Serious Gaming & Simulations GmbH" \
+    --annotation org.opencontainers.image.vendor="SGS Serious Gaming & Simulations GmbH" \
+    --annotation org.opencontainers.image.licenses="MIT" \
+    --annotation org.opencontainers.image.base.name="$BASE_IMAGE" \
+    --annotation org.opencontainers.image.base.digest="$(podman image inspect --format '{{.Digest}}' "$BASE_IMAGE")" \
+    "$CONTAINER"
+
 cmd buildah commit "$CONTAINER" "$IMAGE:${TAGS[0]}"
 cmd buildah rm "$CONTAINER"
 
