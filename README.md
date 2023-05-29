@@ -1,4 +1,4 @@
 Nextcloud
 =========
 
-A php-fpm container of Nextcloud.
+A php-fpm container running Nextcloud.
