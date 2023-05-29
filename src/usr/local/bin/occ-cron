@@ -1,6 +1,22 @@
 #!/bin/sh
+# Nextcloud
+# A php-fpm container of Nextcloud.
+#
+# Copyright (c) 2021  SGS Serious Gaming & Simulations GmbH
+#
+# This work is licensed under the terms of the MIT license.
+# For a copy, see LICENSE file or <https://opensource.org/licenses/MIT>.
+#
+# SPDX-License-Identifier: MIT
+# License-Filename: LICENSE
+
+if [ "$(occ status 2> /dev/null | sed -ne 's/^  - installed: \(.*\)$/\1/p')" != "true" ]; then
+    echo "Nextcloud is not installed - cronjobs are not available" >&2
+    exit 0
+fi
+
 if [ "$(id -un)" != "www-data" ]; then
-    exec su -p -s /bin/sh www-data -c 'php -f /var/www/html/cron.php' -- '/bin/sh'
+    exec su -p -s /bin/sh www-data -c 'php -d memory_limit=2G -f /var/www/html/cron.php' -- '/bin/sh'
 else
-    exec php -f /var/www/html/cron.php
+    exec php -d memory_limit=2G -f /var/www/html/cron.php
 fi

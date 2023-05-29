@@ -1,6 +1,17 @@
 #!/bin/sh
+# Nextcloud
+# A php-fpm container of Nextcloud.
+#
+# Copyright (c) 2021  SGS Serious Gaming & Simulations GmbH
+#
+# This work is licensed under the terms of the MIT license.
+# For a copy, see LICENSE file or <https://opensource.org/licenses/MIT>.
+#
+# SPDX-License-Identifier: MIT
+# License-Filename: LICENSE
+
 if [ "$(id -un)" != "www-data" ]; then
-    exec su -p -s /bin/sh www-data -c 'php -f /var/www/html/occ -- "$@"' -- '/bin/sh' "$@"
+    exec su -p -s /bin/sh www-data -c 'php -d memory_limit=2G -f /var/www/html/occ -- "$@"' -- '/bin/sh' "$@"
 else
-    exec php -f /var/www/html/occ -- "$@"
+    exec php -d memory_limit=2G -f /var/www/html/occ -- "$@"
 fi
