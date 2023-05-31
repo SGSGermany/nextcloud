@@ -55,8 +55,15 @@ rsync -v -rl --exclude '.gitignore' "$BUILD_DIR/src/" "$MOUNT/"
 
 user_add "$CONTAINER" mysql 65538
 
+cleanup "$CONTAINER"
+
 cmd buildah config \
+    --env "PHP_MEMORY_LIMIT-" \
+    --env "PHP_UPLOAD_LIMIT-" \
     --volume "/var/www/html-" \
+    "$CONTAINER"
+
+cmd buildah config \
     --volume "/var/www" \
     --volume "/run/mysql" \
     "$CONTAINER"
