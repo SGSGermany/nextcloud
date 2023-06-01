@@ -1,6 +1,6 @@
 #!/bin/bash
 # Nextcloud
-# A php-fpm container of Nextcloud.
+# A php-fpm container running Nextcloud.
 #
 # Copyright (c) 2021  SGS Serious Gaming & Simulations GmbH
 #
