@@ -30,6 +30,7 @@ if [ $# -gt 0 ] && [[ "$1" =~ ^[a-zA-Z0-9_.-]+$ ]]; then
     BUILD_INFO=".${1,,}"
 fi
 
+# get latest Nextcloud version
 git_clone "$MERGE_IMAGE_GIT_REPO" "$MERGE_IMAGE_GIT_REF" "$BUILD_DIR/vendor" "./vendor"
 
 echo + "VERSION=\"\$(sed -ne 's/^ENV NEXTCLOUD_VERSION \(.*\)$/\1/p' $(quote "./vendor/$MERGE_IMAGE_BUD_CONTEXT/Dockerfile"))\"" >&2
@@ -45,6 +46,7 @@ fi
 
 VERSION_MAJOR="${BASH_REMATCH[1]}"
 
+# build tags
 BUILD_INFO="$(date --utc +'%Y%m%d')$BUILD_INFO"
 
 TAGS=(
