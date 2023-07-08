@@ -55,5 +55,6 @@ TAGS=(
     "latest"
 )
 
+printf 'MILESTONE="%s"\n' "$VERSION_MAJOR"
 printf 'VERSION="%s"\n' "$VERSION"
 printf 'TAGS="%s"\n' "${TAGS[*]}"
