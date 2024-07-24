@@ -22,6 +22,7 @@ export LC_ALL=C.UTF-8
 source "$CI_TOOLS_PATH/helper/common.sh.inc"
 source "$CI_TOOLS_PATH/helper/container.sh.inc"
 source "$CI_TOOLS_PATH/helper/container-alpine.sh.inc"
+source "$CI_TOOLS_PATH/helper/patch.sh.inc"
 source "$CI_TOOLS_PATH/helper/git.sh.inc"
 
 BUILD_DIR="$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
@@ -52,6 +53,8 @@ rm "$MOUNT/etc/php/conf.d/nextcloud.ini"
 
 echo + "rsync -v -rl --exclude .gitignore ./src/ …/" >&2
 rsync -v -rl --exclude '.gitignore' "$BUILD_DIR/src/" "$MOUNT/"
+
+patch_apply "$CONTAINER" "$BUILD_DIR/patch" "./patch"
 
 user_add "$CONTAINER" mysql 65538
 
