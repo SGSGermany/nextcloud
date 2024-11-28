@@ -52,7 +52,7 @@ jobs:
 
       - name: Check end of life
         run: |
-          "$CI_TOOLS_PATH/containers/check-end-of-life.sh" "Nextcloud" "$MILESTONE"
+          ./check-end-of-life.sh
 
       - name: Check for updates
         run: |
