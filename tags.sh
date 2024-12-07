@@ -39,12 +39,14 @@ VERSION="$(sed -ne 's/^ENV NEXTCLOUD_VERSION \(.*\)$/\1/p' "$BUILD_DIR/vendor/$M
 if [ -z "$VERSION" ]; then
     echo "Unable to read Nextcloud version from './vendor/$MERGE_IMAGE_BUD_CONTEXT/Dockerfile': Version not found" >&2
     exit 1
-elif ! [[ "$VERSION" =~ ^([0-9]+)\.[0-9]+\.[0-9]+([+~-]|$) ]]; then
+elif ! [[ "$VERSION" =~ ^(([0-9]+)\.[0-9]+\.[0-9]+)([+~-]|$) ]]; then
     echo "Unable to read Nextcloud version from './vendor/$MERGE_IMAGE_BUD_CONTEXT/Dockerfile': '$VERSION' is no valid version" >&2
     exit 1
 fi
 
-VERSION_MAJOR="${BASH_REMATCH[1]}"
+VERSION_FULL="$VERSION"
+VERSION_MAJOR="${BASH_REMATCH[2]}"
+VERSION="${BASH_REMATCH[1]}"
 
 # build tags
 BUILD_INFO="$(date --utc +'%Y%m%d')$BUILD_INFO"
@@ -56,5 +58,5 @@ TAGS=(
 )
 
 printf 'MILESTONE="%s"\n' "$VERSION_MAJOR"
-printf 'VERSION="%s"\n' "$VERSION"
+printf 'VERSION="%s"\n' "$VERSION_FULL"
 printf 'TAGS="%s"\n' "${TAGS[*]}"

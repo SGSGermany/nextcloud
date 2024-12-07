@@ -45,7 +45,7 @@ if [ -z "${VERSION:-}" ]; then
     if [ -z "$VERSION" ]; then
         echo "Unable to read Nextcloud version from './vendor/$MERGE_IMAGE_BUD_CONTEXT/Dockerfile': Version not found" >&2
         exit 1
-    elif ! [[ "$VERSION" =~ ^([0-9]+)\.[0-9]+\.[0-9]+([+~-]|$) ]]; then
+    elif ! [[ "$VERSION" =~ ^([0-9]+\.[0-9]+\.[0-9]+)([+~-]|$) ]]; then
         echo "Unable to read Nextcloud version from './vendor/$MERGE_IMAGE_BUD_CONTEXT/Dockerfile': '$VERSION' is no valid version" >&2
         exit 1
     fi
@@ -53,15 +53,15 @@ fi
 
 # ensure that the version to build wouldn't cause a version downgrade
 # Nextcloud specifically disallows downgrades and would otherwise leave a broken install
+# for that check to work we inspect the image tagged with the branch (usually 'latest'), not the version
 chkupd_no_downgrade() {
     local IMAGE="$1"
-    local TAG="$2"
 
-    echo + "PREVIOUS_IMAGE_DATA=\"\$(skopeo inspect $(quote "docker://$IMAGE:$TAG"))\"" >&2
-    local PREVIOUS_IMAGE_DATA="$(skopeo inspect "docker://$IMAGE:$TAG")"
+    echo + "PREVIOUS_IMAGE_DATA=\"\$(skopeo inspect $(quote "docker://$IMAGE"))\"" >&2
+    local PREVIOUS_IMAGE_DATA="$(skopeo inspect "docker://$IMAGE")"
 
     if [ -z "$PREVIOUS_IMAGE_DATA" ]; then
-        echo "Failed to inspect previously built Nextcloud image '$IMAGE:$TAG':" \
+        echo "Failed to inspect previously built Nextcloud image '$IMAGE':" \
             "\`skopeo inspect\` failed, likely because there was no image with this tag found" >&2
         return 1
     fi
@@ -87,10 +87,12 @@ chkupd_no_downgrade() {
     fi
 }
 
-chkupd_no_downgrade "$REGISTRY/$OWNER/$IMAGE" "$BRANCH_TAG" || exit 0
+chkupd_no_downgrade "$REGISTRY/$OWNER/$IMAGE:$BRANCH_TAG" || exit 0
 
 # check whether the base image was updated
+# also yields to build the image if the Nextcloud version wasn't built before
 chkupd_baseimage "$REGISTRY/$OWNER/$IMAGE" "$TAG" || exit 0
 
-# check whether the image is using the Nextcloud version to build (presumably the latest)
+# check whether the image is using the Nextcloud version to build
+# this usually just catches version suffixes, e.g. '-pl1'
 chkupd_image_version "$REGISTRY/$OWNER/$IMAGE:$TAG" "$VERSION" || exit 0
