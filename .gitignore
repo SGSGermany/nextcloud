@@ -12,3 +12,7 @@ desktop.ini
 
 # Build script
 /vendor
+
+# Patch system
+/patch/**/*.new
+/patch/**/*.old
