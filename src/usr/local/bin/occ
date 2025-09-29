@@ -18,7 +18,7 @@ set -eu
 RUN_AS="$(stat -c %U /var/www/html/occ)"
 [ -n "$RUN_AS" ] && [ "$RUN_AS" != "UNKNOWN" ] || { echo "Unable to run \`occ\`: Failed to determine www-data user" >&2 ; exit 1 ; }
 
-if [ "$(id -u)" = 0 ]; then
+if [ "$(id -u)" = 0 ] && [ "$(id -un)" != "$RUN_AS" ]; then
     exec su -p "$RUN_AS" -s /bin/sh -c 'exec php -d memory_limit=2G -f /var/www/html/occ -- "$@"' -- '/bin/sh' "$@"
 else
     exec php -d memory_limit=2G -f /var/www/html/occ -- "$@"
