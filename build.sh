@@ -23,6 +23,7 @@ source "$CI_TOOLS_PATH/helper/common.sh.inc"
 source "$CI_TOOLS_PATH/helper/container.sh.inc"
 source "$CI_TOOLS_PATH/helper/container-alpine.sh.inc"
 source "$CI_TOOLS_PATH/helper/patch.sh.inc"
+source "$CI_TOOLS_PATH/helper/php.sh.inc"
 source "$CI_TOOLS_PATH/helper/git.sh.inc"
 
 BUILD_DIR="$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
@@ -50,6 +51,13 @@ rm "$MOUNT/cron.sh"
 
 echo + "rm …/etc/php/conf.d/nextcloud.ini" >&2
 rm "$MOUNT/etc/php/conf.d/nextcloud.ini"
+
+cmd php_patch_config_list -a "$CONTAINER" "/etc/php-fpm/pool.d/www.conf" \
+    "php(_admin)?_(flag|value)" \
+    "php_admin_value[memory_limit]" "512M" \
+    "php_admin_value[max_execution_time]" "600" \
+    "php_admin_value[upload_max_filesize]" "1024M" \
+    "php_admin_value[post_max_size]" "1040M"
 
 echo + "rsync -v -rl --exclude .gitignore ./src/ …/" >&2
 rsync -v -rl --exclude '.gitignore' "$BUILD_DIR/src/" "$MOUNT/"
