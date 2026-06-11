@@ -14,9 +14,13 @@ set -e
 
 [ $# -gt 0 ] || set -- php-fpm "$@"
 if [ "$1" == "php-fpm" ]; then
+    # setup Nextcloud
     NEXTCLOUD_UPDATE=1 docker-nc-entrypoint "true"
 
+    # run crond
     crond -f -l 7 -L /dev/stdout &
+
+    # run Nextcloud's cronjobs once
     occ-cron
 
     exec "$@"
